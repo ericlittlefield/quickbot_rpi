@@ -15,9 +15,9 @@ def convertHEXtoDEC(hexString, N):
     """
     for hexChar in hexString:
         asciiNum = ord(hexChar)
-        if not ((asciiNum >= 48 and asciiNum <= 57) or
-                (asciiNum >= 65 and asciiNum <= 70) or
-                (asciiNum >= 97 and asciiNum <= 102)):
+        if not ((asciiNum > 47 and asciiNum < 58) or
+                (asciiNum > 64 and asciiNum < 71) or
+                (asciiNum > 96 and asciiNum < 103)):
             val = float('nan')
             return val
 
@@ -146,7 +146,7 @@ def toc(tictocName='toc', printFlag=True):
     TICTOC_MIN = min(TICTOC_MIN, tictocTime)
 
     if printFlag:
-        print tictocName + " time: " + str(tictocTime)
+        print(tictocName + " time: " + str(tictocTime))
 
 
 def tictocPrint():
@@ -155,11 +155,11 @@ def tictocPrint():
     global TICTOC_MAX
     global TICTOC_MIN
 
-    print "Tic Toc Stats:"
-    print "Count = " + str(TICTOC_COUNT)
-    print "Mean = " + str(TICTOC_MEAN)
-    print "Max = " + str(TICTOC_MAX)
-    print "Min = " + str(TICTOC_MIN)
+    print("Tic Toc Stats:")
+    print("Count = " + str(TICTOC_COUNT))
+    print("Mean = " + str(TICTOC_MEAN))
+    print("Max = " + str(TICTOC_MAX))
+    print("Min = " + str(TICTOC_MIN))
 
 
 def recursiveMeanVar(x, l, mu, sigma2):

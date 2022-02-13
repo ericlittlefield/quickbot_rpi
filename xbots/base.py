@@ -14,8 +14,8 @@ import re
 import socket
 import threading
 
-import Adafruit_BBIO.GPIO as GPIO
-import Adafruit_BBIO.PWM as PWM
+#import Adafruit_BBIO.GPIO as GPIO
+#import Adafruit_BBIO.PWM as PWM
 
 LEFT = 0
 RIGHT = 1
@@ -55,20 +55,21 @@ class BaseBot(object):
     # UDP
     port = 5005
     robotSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    robotSocket.setblocking(False)
+    robotSocket.setblocking(True)
+    robotSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
 
     def __init__(self, base_ip, robot_ip):
         # Run flag
         self.run_flag = True
 
         # Initialize GPIO pins
-        self._setup_gpio()
+        #self._setup_gpio()
 
         # Initialize PWM pins: PWM.start(channel, duty, freq=2000, polarity=0)
-        self._init_pwm()
+        #self._init_pwm()
 
         # Set motor speed to 0
-        self.set_pwm([0, 0])
+        #self.set_pwm([0, 0])
 
         # Set IP addresses
         self.base_ip = base_ip
@@ -80,73 +81,73 @@ class BaseBot(object):
                                                    args=(self,))
         self.cmd_parsing_thread.daemon = True
 
-    def _setup_gpio(self):
-        """Initialize GPIO pins"""
-        GPIO.setup(self.dir1Pin[LEFT], GPIO.OUT)
-        GPIO.setup(self.dir2Pin[LEFT], GPIO.OUT)
-        GPIO.setup(self.dir1Pin[RIGHT], GPIO.OUT)
-        GPIO.setup(self.dir2Pin[RIGHT], GPIO.OUT)
-        GPIO.setup(self.led, GPIO.OUT)
+    # def _setup_gpio(self):
+    #     """Initialize GPIO pins"""
+    #     GPIO.setup(self.dir1Pin[LEFT], GPIO.OUT)
+    #     GPIO.setup(self.dir2Pin[LEFT], GPIO.OUT)
+    #     GPIO.setup(self.dir1Pin[RIGHT], GPIO.OUT)
+    #     GPIO.setup(self.dir2Pin[RIGHT], GPIO.OUT)
+    #     GPIO.setup(self.led, GPIO.OUT)
 
-    def _init_pwm(self):
-        """
-        Initialize PWM pins
-        """
+    # def _init_pwm(self):
+    #     """
+    #     Initialize PWM pins
+    #     """
 
-        # It is currently not possible to set frequency for two PWM
-        # a maybe solution patch pwm_test.c
-        # https://github.com/SaadAhmad/beaglebone-black-cpp-PWM
-        PWM.start(self.pwmPin[LEFT], 0)
-        PWM.start(self.pwmPin[RIGHT], 0)
+    #     # It is currently not possible to set frequency for two PWM
+    #     # a maybe solution patch pwm_test.c
+    #     # https://github.com/SaadAhmad/beaglebone-black-cpp-PWM
+    #     PWM.start(self.pwmPin[LEFT], 0)
+    #     PWM.start(self.pwmPin[RIGHT], 0)
 
-    def set_pwm(self, pwm):
-        """ Set motor PWM values """
-        # [leftSpeed, rightSpeed]: 0 is off, caps at min and max values
+    # def set_pwm(self, pwm):
+    #     """ Set motor PWM values """
+    #     # [leftSpeed, rightSpeed]: 0 is off, caps at min and max values
 
-        self.set_pwm_left(pwm[LEFT])
-        self.set_pwm_right(pwm[RIGHT])
+    #     self.set_pwm_left(pwm[LEFT])
+    #     self.set_pwm_right(pwm[RIGHT])
 
-    def set_pwm_left(self, pwm_left):
-        """ Set left motor PWM value """
+    # def set_pwm_left(self, pwm_left):
+    #     """ Set left motor PWM value """
 
-        self.pwm[LEFT] = min(
-            max(pwm_left, self.pwmLimits[MIN]), self.pwmLimits[MAX])
+    #     self.pwm[LEFT] = min(
+    #         max(pwm_left, self.pwmLimits[MIN]), self.pwmLimits[MAX])
 
-        if self.pwm[LEFT] > 0:
-            GPIO.output(self.dir1Pin[LEFT], GPIO.LOW)
-            GPIO.output(self.dir2Pin[LEFT], GPIO.HIGH)
-            PWM.set_duty_cycle(self.pwmPin[LEFT], abs(self.pwm[LEFT]))
-        elif self.pwm[LEFT] < 0:
-            GPIO.output(self.dir1Pin[LEFT], GPIO.HIGH)
-            GPIO.output(self.dir2Pin[LEFT], GPIO.LOW)
-            PWM.set_duty_cycle(self.pwmPin[LEFT], abs(self.pwm[LEFT]))
-        else:
-            GPIO.output(self.dir1Pin[LEFT], GPIO.LOW)
-            GPIO.output(self.dir2Pin[LEFT], GPIO.LOW)
-            PWM.set_duty_cycle(self.pwmPin[LEFT], 0)
+    #     if self.pwm[LEFT] > 0:
+    #         GPIO.output(self.dir1Pin[LEFT], GPIO.LOW)
+    #         GPIO.output(self.dir2Pin[LEFT], GPIO.HIGH)
+    #         PWM.set_duty_cycle(self.pwmPin[LEFT], abs(self.pwm[LEFT]))
+    #     elif self.pwm[LEFT] < 0:
+    #         GPIO.output(self.dir1Pin[LEFT], GPIO.HIGH)
+    #         GPIO.output(self.dir2Pin[LEFT], GPIO.LOW)
+    #         PWM.set_duty_cycle(self.pwmPin[LEFT], abs(self.pwm[LEFT]))
+    #     else:
+    #         GPIO.output(self.dir1Pin[LEFT], GPIO.LOW)
+    #         GPIO.output(self.dir2Pin[LEFT], GPIO.LOW)
+    #         PWM.set_duty_cycle(self.pwmPin[LEFT], 0)
 
-    def set_pwm_right(self, pwm_right):
-        """ Set right motor PWM value """
+    # def set_pwm_right(self, pwm_right):
+    #     """ Set right motor PWM value """
 
-        self.pwm[RIGHT] = min(
-            max(pwm_right, self.pwmLimits[MIN]), self.pwmLimits[MAX])
+    #     self.pwm[RIGHT] = min(
+    #         max(pwm_right, self.pwmLimits[MIN]), self.pwmLimits[MAX])
 
-        if self.pwm[RIGHT] > 0:
-            GPIO.output(self.dir1Pin[RIGHT], GPIO.LOW)
-            GPIO.output(self.dir2Pin[RIGHT], GPIO.HIGH)
-            PWM.set_duty_cycle(self.pwmPin[RIGHT], abs(self.pwm[RIGHT]))
-        elif self.pwm[RIGHT] < 0:
-            GPIO.output(self.dir1Pin[RIGHT], GPIO.HIGH)
-            GPIO.output(self.dir2Pin[RIGHT], GPIO.LOW)
-            PWM.set_duty_cycle(self.pwmPin[RIGHT], abs(self.pwm[RIGHT]))
-        else:
-            GPIO.output(self.dir1Pin[RIGHT], GPIO.LOW)
-            GPIO.output(self.dir2Pin[RIGHT], GPIO.LOW)
-            PWM.set_duty_cycle(self.pwmPin[RIGHT], 0)
+    #     if self.pwm[RIGHT] > 0:
+    #         GPIO.output(self.dir1Pin[RIGHT], GPIO.LOW)
+    #         GPIO.output(self.dir2Pin[RIGHT], GPIO.HIGH)
+    #         PWM.set_duty_cycle(self.pwmPin[RIGHT], abs(self.pwm[RIGHT]))
+    #     elif self.pwm[RIGHT] < 0:
+    #         GPIO.output(self.dir1Pin[RIGHT], GPIO.HIGH)
+    #         GPIO.output(self.dir2Pin[RIGHT], GPIO.LOW)
+    #         PWM.set_duty_cycle(self.pwmPin[RIGHT], abs(self.pwm[RIGHT]))
+    #     else:
+    #         GPIO.output(self.dir1Pin[RIGHT], GPIO.LOW)
+    #         GPIO.output(self.dir2Pin[RIGHT], GPIO.LOW)
+    #         PWM.set_duty_cycle(self.pwmPin[RIGHT], 0)
 
-    def get_pwm(self):
-        """ Get motor PWM values """
-        return self.pwm
+    # def get_pwm(self):
+    #     """ Get motor PWM values """
+    #     return self.pwm
 
     def start_threads(self):
         """ Start all threads """
@@ -154,13 +155,13 @@ class BaseBot(object):
 
     def update(self):
         """ Update which occures once per cycle of the run loop """
-        # Flash BBB LED
-        if self.led_flag is True:
-            self.led_flag = False
-            GPIO.output(self.led, GPIO.HIGH)
-        else:
-            self.led_flag = True
-            GPIO.output(self.led, GPIO.LOW)
+        # # Flash BBB LED
+        # if self.led_flag is True:
+        #     self.led_flag = False
+        #     GPIO.output(self.led, GPIO.HIGH)
+        # else:
+        #     self.led_flag = True
+        #     GPIO.output(self.led, GPIO.LOW)
 
     def run(self):
         """ The run loop """
@@ -183,12 +184,12 @@ class BaseBot(object):
     def cleanup(self):
         """ Clean up before shutting down. """
         sys.stdout.write("Shutting down...")
-        self.set_pwm([0, 0])
+        # self.set_pwm([0, 0])
         self.robotSocket.close()
-        GPIO.cleanup()
-        PWM.cleanup()
-        if DEBUG:
-            pass
+        # GPIO.cleanup()
+        # PWM.cleanup()
+        # if DEBUG:
+        #     pass
             # tictocPrint()
             # self.writeBuffersToFile()
         sys.stdout.write("Done\n")
@@ -221,11 +222,11 @@ def parse_cmd(self):
     try:
         while self.run_flag:
             try:
-                line = self.robotSocket.recv(1024)
+                msgAndSender = self.robotSocket.recvfrom(1024)
             except socket.error as msg:
                 continue
 
-            self.cmdBuffer += line
+            self.cmdBuffer += msgAndSender[0].decode('utf-8')
 
             # String contained within $ and * (with no $ or * symbols in it)
             buf_pattern = r'\$[^\$\*]*?\*'
@@ -234,10 +235,10 @@ def parse_cmd(self):
 
             if buf_result:
                 msg = buf_result.group()
-                print msg
+                print( msg )
                 self.cmdBuffer = ''
 
-                cmd_pattern = r'(?P<CMD>[A-Z]{3,})'
+                cmd_pattern = r'(?P<CMD>[A-Z]{2,})'
                 set_pattern = r'(?P<SET>=?)'
                 query_pattern = r'(?P<QUERY>\??)'
                 arg_pattern = r'(?(2)(?P<ARGS>.*))'
@@ -253,14 +254,15 @@ def parse_cmd(self):
 
                 if msg_result.group('CMD') == 'CHECK':
                     self.robotSocket.sendto(
-                        'Hello from QuickBot\n', (self.base_ip, self.port))
-
+                        ('Hello from QuickBot\n').encode('utf-8'), msgAndSender[1])
+                elif msg_result.group('CMD') == 'UI':
+                    self.robotSocket.sendto(('Hello from QuickBot\n').encode('utf-8'), msgAndSender[1])
                 elif msg_result.group('CMD') == 'PWM':
                     if msg_result.group('QUERY'):
                         if VERBOSE:
-                            print str(self.get_pwm())
-                        self.robotSocket.sendto(str(self.get_pwm()) + '\n',
-                                                (self.base_ip, self.port))
+                            print( str(self.get_pwm()))
+                        self.robotSocket.sendto((str(self.get_pwm()) + '\n').encode('utf-8'),
+                                                 msgAndSender[1])
 
                     elif msg_result.group('SET') and msg_result.group('ARGS'):
                         args = msg_result.group('ARGS')
@@ -272,29 +274,29 @@ def parse_cmd(self):
                                     int(pwm_result.group('RIGHT'))]
                             self.set_pwm(pwm)
 
-                    self.robotSocket.sendto(str(self.get_pwm()) + '\n',
-                                            (self.base_ip, self.port))
+                    self.robotSocket.sendto((str(self.get_pwm()) + '\n').encode('utf-8'),
+                                             msgAndSender[1])
 
                 elif msg_result.group('CMD') == 'IRVAL':
                     if msg_result.group('QUERY'):
                         reply = '[' + ', '.join(map(str, self.get_ir())) + ']'
-                        print 'Sending: ' + reply
+                        print('Sending: ' + reply)
                         self.robotSocket.sendto(
-                            reply + '\n', (self.base_ip, self.port))
+                            (reply + '\n').encode('utf-8'),  msgAndSender[1])
 
                 elif msg_result.group('CMD') == 'ULTRAVAL':
                     if msg_result.group('QUERY'):
                         reply = '[' + ', '.join(map(str, self.ultraVal)) + ']'
-                        print 'Sending: ' + reply
+                        print('Sending: ' + reply)
                         self.robotSocket.sendto(
-                            reply + '\n', (self.base_ip, self.port))
+                            (reply + '\n').encode('utf-8'),  msgAndSender[1])
 
                 elif msg_result.group('CMD') == 'WHEELANG':
                     if msg_result.group('QUERY'):
-                        print 'Sending: ' + str(self.get_wheel_ang())
+                        print('Sending: ' + str(self.get_wheel_ang()))
                         self.robotSocket.sendto(
-                            str(self.get_wheel_ang()) +
-                            '\n', (self.base_ip, self.port))
+                            (str(self.get_wheel_ang()) +
+                            '\n').encode('utf-8'),  msgAndSender[1])
 
                     elif msg_result.group('SET') and msg_result.group('ARGS'):
                         args = msg_result.group('ARGS')
@@ -311,9 +313,9 @@ def parse_cmd(self):
                     if msg_result.group('QUERY'):
                         reply = \
                             '[' + ', '.join(map(str, self.get_enc_val())) + ']'
-                        print 'Sending: ' + reply
+                        print('Sending: ' + reply)
                         self.robotSocket.sendto(
-                            reply + '\n', (self.base_ip, self.port))
+                            (reply + '\n').encode('utf-8'),  msgAndSender[1])
 
                     elif msg_result.group('SET') and msg_result.group('ARGS'):
                         args = msg_result.group('ARGS')
@@ -330,17 +332,17 @@ def parse_cmd(self):
                     if msg_result.group('QUERY'):
                         reply = \
                             '[' + ', '.join(map(str, self.get_enc_raw())) + ']'
-                        print 'Sending: ' + reply
+                        print('Sending: ' + reply)
                         self.robotSocket.sendto(
-                            reply + '\n', (self.base_ip, self.port))
+                            (reply + '\n').encode('utf-8'),  msgAndSender[1])
 
                 elif msg_result.group('CMD') == 'ENOFFSET':
                     if msg_result.group('QUERY'):
                         reply = '[' + \
                             ', '.join(map(str, self.get_enc_offset())) + ']'
-                        print 'Sending: ' + reply
+                        print('Sending: ' + reply)
                         self.robotSocket.sendto(
-                            reply + '\n', (self.base_ip, self.port))
+                            (reply + '\n').encode('utf-8'),  msgAndSender[1])
 
                     elif msg_result.group('SET') and msg_result.group('ARGS'):
                         args = msg_result.group('ARGS')
@@ -356,10 +358,10 @@ def parse_cmd(self):
                 elif msg_result.group('CMD') == 'ENVEL':
                     if msg_result.group('QUERY'):
                         reply = \
-                            '[' + ', '.join(map(str, self.get_enc_vel())) + ']'
-                        print 'Sending: ' + reply
+                            '[' + ', '.join(map(str, self.get_enc_vel())) + ']' + "{" + ", ".join(map(str, self.get_enc_est_vel())) + "}"
+                        print('Sending: ' + reply)
                         self.robotSocket.sendto(
-                            reply + '\n', (self.base_ip, self.port))
+                            (reply + '\n').encode('utf-8'),  msgAndSender[1])
 
                     elif msg_result.group('SET') and msg_result.group('ARGS'):
                         args = msg_result.group('ARGS')
@@ -376,9 +378,9 @@ def parse_cmd(self):
                     if msg_result.group('QUERY'):
                         reply = \
                             '[' + ', '.join(map(str, self.get_wheel_ang_vel())) + ']'
-                        print 'Sending: ' + reply
+                        print('Sending: ' + reply)
                         self.robotSocket.sendto(
-                            reply + '\n', (self.base_ip, self.port))
+                            (reply + '\n').encode('utf-8'),  msgAndSender[1])
 
                     elif msg_result.group('SET') and msg_result.group('ARGS'):
                         args = msg_result.group('ARGS')
@@ -395,7 +397,7 @@ def parse_cmd(self):
                     self.reset_enc_val()
                     reply = \
                             '[' + ', '.join(map(str, self.get_enc_val())) + ']'
-                    print 'Encoder values reset to ' + reply
+                    print('Encoder values reset to ' + reply)
 
                 elif msg_result.group('CMD') == 'UPDATE':
                     if msg_result.group('SET') and msg_result.group('ARGS'):
@@ -410,15 +412,15 @@ def parse_cmd(self):
 
                         reply = '[' + ', '.join(map(str, self.enc_pos)) + ', ' \
                             + ', '.join(map(str, self.encVel)) + ']'
-                        print 'Sending: ' + reply
+                        print('Sending: ' + reply)
                         self.robotSocket.sendto(
-                            reply + '\n', (self.base_ip, self.port))
+                            (reply + '\n').encode('utf-8'),  msgAndSender[1])
 
                 elif msg_result.group('CMD') == 'END':
                     self.end_run()
 
                 else:
-                    print 'Invalid: ' + msg
+                    print('Invalid: ' + msg)
     except:
         self.end_run()
         raise

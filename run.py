@@ -11,15 +11,24 @@
 
 import sys
 import argparse
+import struct
+import socket
+from netifaces import AF_INET, AF_INET6, AF_LINK, AF_PACKET, AF_BRIDGE
+import netifaces as ni
 
-def get_ip(iface = 'eth0'):
-    ifreq = struct.pack('16sH14s', iface, socket.AF_INET, '\x00'*14)
-    try:
-        res = fcntl.ioctl(sockfd, SIOCGIFADDR, ifreq)
-    except:
-        return None
-    ip = struct.unpack('16sH2x4s8x', res)[2]
-    return socket.inet_ntoa(ip)
+import xbots.base
+
+
+
+
+def get_ip(iface = 'wlan0'):
+    #ip = ni.ifaddresses(iface)[AF_INET][0]['addr']
+    interfaces = ni.interfaces()
+    interface = ni.ifaddresses(iface)
+    afnet = interface[AF_INET]
+    ip = afnet[0]['addr']
+
+    return ip
 
 
 
@@ -29,12 +38,11 @@ RTYPES = ('quick_v2', 'quick_v1', 'ultra', 'quick_rpi')
 
 def main(options):
     """ Main function """
-    print "Running XBot"
-
-    print 'Running XBot Program'
-    print '    Base IP: ', options.ip
-    print '    Robot IP: ', options.rip
-    print '    Robot Type: ', options.rtype
+    print ("Running XBot")
+    print ('Running XBot Program')
+    print ('    Base IP: ', options.ip)
+    print ('    Robot IP: ', options.rip)
+    print ('    Robot Type: ', options.rtype)
 
     if options.rtype == 'quick_v2':
         import xbots.quickbot_v2
@@ -45,8 +53,9 @@ def main(options):
     elif options.rtype == 'ultra':
         import xbots.ultrabot
         qb = xbots.ultrabot.UltraBot(options.ip, options.rip)
-    elif option.rtype == 'quick_rpi':
-        qb = xbots.quickbot_rpi.QuickBot_rpi(options.ip, option.rip)
+    elif options.rtype == 'quick_rpi':
+        import xbots.quickbot_rpi
+        qb = xbots.quickbot_rpi.QuickBot_rpi(options.ip, options.rip)
     else:
         raise Exception("No valid robot target provided")
 
@@ -70,6 +79,6 @@ if __name__ == '__main__':
 
     options = parser.parse_args()
     if options.rtype not in RTYPES:
-        print "Chosen type not exists use (%s)" % '|'.join(RTYPES)
+        print ("Chosen type not exists use (%s)" % '|'.join(RTYPES))
         sys.exit(0)
     main(options)

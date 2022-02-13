@@ -41,24 +41,26 @@ class MotorPin(object):  #pylint: disable=R0903
         self.pwm = pwm
 
 # IR sensor Pins
-IR_BL = "P9_40"  # IR back left pin
-IR_FL = "P9_38"  # IR front left pin
-IR_FM = "P9_36"  # IR front middle pin
-IR_FR = "P9_35"  # IR front right pin
-IR_BR = "P9_33"  # IR back right pin
-IR = (IR_BL, IR_FL, IR_FM, IR_FR, IR_BR)  # IR pin set
+#IR_BL = "P9_40"  # IR back left pin
+#IR_FL = "P9_38"  # IR front left pin
+#IR_FM = "P9_36"  # IR front middle pin
+#IR_FR = "P9_35"  # IR front right pin
+#IR_BR = "P9_33"  # IR back right pin
+#IR = (IR_BL, IR_FL, IR_FM, IR_FR, IR_BR)  # IR pin set
 
 # Encoder (aka odometry) serials
     # TTYO1: Rx=P9_26  Tx=P9_24
     # TTYO2: Rx=P9_22  Tx=P9_21
     # TTYO4: Rx=P9_11  Tx=P9_13
     # TTYO5: Rx=P9_38  Tx=P9_38
-EN_L = EncoderSerial('/dev/ttyO1', 38400)  # Encoder left serial
-EN_R = EncoderSerial('/dev/ttyO2', 38400)  # Encoder right serial
+#ENCODER_SERIAL = EncoderSerial('/dev/ttyUSB0', 115200)  # Encoder serial
+ENCODER_SERIAL = EncoderSerial('/dev/serial0', 115200)  # Encoder serial
+encoder_count_per_turn = 960
+wheel_radius_in_meters = 0.05
 
 # Motor pins
-MOTOR_L = MotorPin("P8_14", "P8_16", "P9_16")
-MOTOR_R = MotorPin("P8_12", "P8_10", "P9_14")
+#MOTOR_L = MotorPin("P8_14", "P8_16", "P9_16")
+#MOTOR_R = MotorPin("P8_12", "P8_10", "P9_14")
 
 # LED pin
-LED = "USR1"
+
